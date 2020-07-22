@@ -15789,7 +15789,7 @@ isPrivacy         -1.3131   0.5782 -2.2710 0.0231 -2.4464 -0.1798
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In the updated model, we see that we may reject the null hypothesis for each coefficient since all the p-values are less than .05.</p>
+<p>In the updated model, we see that we may reject the null hypothesis for each coefficient since all the p-values are less than .05. Looking at the coefficients themselves, we can spot some interesting observations. First, the lc_cons coefficient is negative, meaning that Chief Justice Roberts is less likely to vote conservatively if the lower court decided conservatively. This seems backwards at first glance, but makes sense since the Court generally only takes cases of national importance and often only takes cases on which lower courts are divided. This is evidenced by the positive lc_lib coefficient, indicating that Chief Justice Roberts is more likely to vote conservatively if the lower court ruled liberally. Second, the categorical variables coefficients capturing different legal issues indicate that Chief Justice Roberts has certain voting tendencies in regards to the different legal issues. For example, the isPrivacy coefficient is strongly negative and is the strongest categorical coefficient in the model, indicating that Roberts may have a strong tendency to vote liberally on cases involving privacy. In contrast, the isFederalism coefficient is positive, indicating that Roberts may have a tendency to vote conservatively on Federalism cases.</p>
 <p>Next, we can test our model and determine its accuracy.</p>
 
 </div>
