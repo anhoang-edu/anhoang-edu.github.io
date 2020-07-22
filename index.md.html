@@ -13077,20 +13077,39 @@ div#notebook {
 <div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div><div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
+<p><img src="https://www.supremecourt.gov/about/images/NewGroupPhoto.jpg" alt="Image of Supreme Court"></p>
 <h1 id="What-Would-Chief-Justice-Roberts-Do?"><center>What Would Chief Justice Roberts Do?</center><a class="anchor-link" href="#What-Would-Chief-Justice-Roberts-Do?">&#182;</a></h1><h1 id="*An-Analysis-and-Prediction-of-Conservative/Liberal-Votes.*"><center>*An Analysis and Prediction of Conservative/Liberal Votes.*</center><a class="anchor-link" href="#*An-Analysis-and-Prediction-of-Conservative/Liberal-Votes.*">&#182;</a></h1><center>An Hoang</center><hr>
-<h2 id="Introduction"><center>Introduction</center><a class="anchor-link" href="#Introduction">&#182;</a></h2><p>The Supreme Court.</p>
+<h2 id="Introduction"><center>Introduction</center><a class="anchor-link" href="#Introduction">&#182;</a></h2><p>The Supreme Court is an important institution in the United States as its decisions on the cases it reviews (or even cases it chooses not to review) can have a sweeping impact on individuals and organization not just in America, but around the world. In recent times, the Court has ruled on cases involving hot-button topics such as abortion, religion, criminal law, immigration, constitutional powers of government, and voting rights. There are 9 sitting Supreme Court justices - 8 associate Justices and 1 Chief Justice, CJ Roberts. Two of the associate Justices (Gorsuch and Kavanaugh) are recent additions, replacing the late Justice Scalia and retired Justice Kennedy. Appointed by President Trump, Justice Gorsuch and Justice Kavanaugh are viewed as conservative Justices that have swung the Supreme Court's ideological tendencies to the right. In effect, Chief Justice Roberts, also viewed as a relatively conservative judge in the past, is now considered by some to be the Court's ideological center (<em>i.e.</em>, the swing vote). See <a href="https://www.theguardian.com/law/2020/jun/30/john-roberts-supreme-court-conservatives">here</a>.</p>
+<p>Given the importance of the issues considered by the Supreme Court, there are a number of <a href="https://www.scotusblog.com/">observers</a> that track and analyze the Court's decisions. There are even publications regarding the voting tendencies of each individual Justice and academic articles that seek to quantify those tendencies. For example, see <a href="https://en.wikipedia.org/wiki/Ideological_leanings_of_United_States_Supreme_Court_justices">here</a> and <a href="https://mqscores.lsa.umich.edu/measures.php">here</a>. The idea is that if we can accurately predict each Justice's particular inclinations and understand their judicial philosophy, we can predict the outcome of each case argued before the Court.</p>
+<p>In this tutorial, the goal is to explore and analyze past Supreme Court cases and gain insight into which variables might be successful in predicting how a Supreme Court Justice might vote on any specific case. Specifically, this tutorial seeks to provide an accurate model for predicting how Chief Justice Roberts may vote on a case, based on specific case attributes.  Models for other Justices may be explored using similar means described in the tutorial below.</p>
+<hr>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="Getting-Started-/-Getting-Data"><center>Getting Started / Getting Data</center><a class="anchor-link" href="#Getting-Started-/-Getting-Data">&#182;</a></h2><p>We use python3 along with various imported libraries (pandas, numpy, scipy, matplotlib, scikit-learn, and seaborn) for data analyis, visualization, and prediction.</p>
+<p><a href="http://scdb.wustl.edu/data.php">Supreme Court case data</a> is from the Supreme Court Database managed by Washington University School of Law</p>
+<p><a href="https://mqscores.lsa.umich.edu/measures.php">Martin-Quinn Scores</a> are from Professors Martin and Quinn at University of Michigan.</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[1]:</div>
+<div class="prompt input_prompt">In&nbsp;[25]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#Needs to have &quot;SCDB.xlsx&quot; and &quot;justices.csv&quot; in the same directory</span>
 
-<span class="c1">#!pip install plotnine </span>
+<span class="c1">#SCDB.xlsx - download here: http://scdb.wustl.edu/_brickFiles/2019_01/SCDB_2019_01_justiceCentered_Vote.xlsx.zip</span>
+    <span class="c1">#and rename SCDB.xlsx</span>
+    
+<span class="c1">#justices.csv - download here: https://mqscores.lsa.umich.edu/media/2019/justices.csv</span>
+
+<span class="c1">#!pip install plotnine #install if not installed already</span>
 
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -13113,8 +13132,28 @@ div#notebook {
 <span class="n">pd</span><span class="o">.</span><span class="n">set_option</span><span class="p">(</span><span class="s1">&#39;display.max_colwidth&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 
 <span class="n">np</span><span class="o">.</span><span class="n">set_printoptions</span><span class="p">(</span><span class="n">suppress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
 
-<span class="c1">#reading in SCJ voting data</span>
+    </div>
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Supreme-Court-Case-data">Supreme Court Case data<a class="anchor-link" href="#Supreme-Court-Case-data">&#182;</a></h3><p>The Supreme Court Case data comes in a variety of formats. One choice to make is to either get Case centered data or Justice centered data. Case centered data provide case-level information in each row, but does not provide granular information regarding how each Justice voted on each case. Therefore, we use the Justice centered data which includes a set of justice votes for each dispute. The data comes different file formats as well, such as .csv, Rdata, and .xlsx. We use the .xlsx format to import into a pandas dataframe as it's the most straightforward method.</p>
+<h3 id="Reading-the-Data">Reading the Data<a class="anchor-link" href="#Reading-the-Data">&#182;</a></h3>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#reading in SCJ voting data</span>
+
 <span class="n">data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="s2">&quot;SCDB.xlsx&quot;</span><span class="p">)</span>
 <span class="n">data</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
@@ -13129,7 +13168,7 @@ div#notebook {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[1]:</div>
+    <div class="prompt output_prompt">Out[26]:</div>
 
 
 
@@ -13547,22 +13586,24 @@ div#notebook {
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In the Supreme Court Case dataset, there are quite a lot of columns - many of which we do not need for the purposes of this analysis. For example, the dataset includes bibliographic information about each case, such as  the id, docket, decision date, citations, etc. We drop many of these columns in the next section to make the dataset size more manageable. However, some of these columns may provide fertile ground for further exploration and analysis for predictive value. Among the columns that we do keep in this tutorial, we include:</p>
+<ul>
+<li>adminAction (whether the case arose from an administrative case)</li>
+<li>lcDipositionDirection (whether the lower court ruled conservatively or liberally)</li>
+<li>issueArea (the nature of key legal issue in the case)</li>
+<li>direction (whether the Justice voted conservatively or liberally)</li>
+</ul>
+<p>The column names are generally self-explanatory but some columns are encoded with values, such as justice, vote, opinion, direction, lawType, etc. To learn more about these encoded values, see <a href="http://scdb.wustl.edu/documentation.php">the Supreme Court Database website for documentation on each column.</a></p>
+
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span> 
-</pre></div>
-
-    </div>
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[2]:</div>
+<div class="prompt input_prompt">In&nbsp;[27]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#Dropping unused column data to trim down the dataframe size</span>
@@ -13595,7 +13636,7 @@ div#notebook {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[2]:</div>
+    <div class="prompt output_prompt">Out[27]:</div>
 
 
 
@@ -13725,9 +13766,19 @@ div#notebook {
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="Martin-Quinn-Scores">Martin-Quinn Scores<a class="anchor-link" href="#Martin-Quinn-Scores">&#182;</a></h3><p>Martin-Quinn Scores is a calculated statistic devised by Andrew D. Martin and Kevin M. Quinn. The MQ Scores employ Markov chain Monte Carlo methods to fit a Bayesian measurement model of ideal points (policy preferences on a one-dimensional scale) for all the Justices based on the votes in every contested Supreme Court case since 1937. See <a href="http://mqscores.lsa.umich.edu/index.php">here</a>.</p>
+<p>In a nutshell, MS Scores measure the relative location of U.S. Supreme Court justices on an ideological continuum. We introduce these scores as another potential predictor of how likely a justice may vote conservatively vs. liberally.</p>
+<p>The MS Scores are based on the Supreme Court Case dataset above, and therefore align quite nicely with that dataset.</p>
+<h3 id="Reading-the-Data">Reading the Data<a class="anchor-link" href="#Reading-the-Data">&#182;</a></h3>
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[3]:</div>
+<div class="prompt input_prompt">In&nbsp;[28]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#reading in Martin-Quinn scores for each justice</span>
@@ -13748,7 +13799,7 @@ div#notebook {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[3]:</div>
+    <div class="prompt output_prompt">Out[28]:</div>
 
 
 
@@ -13848,53 +13899,55 @@ div#notebook {
 </div>
 
 </div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[4]:</div>
-<div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#Voting in Cases for all SCJs</span>
-<span class="c1">#Fraction Conserv - all cases</span>
-<span class="c1">#Fraction Conserv - civil liberties</span>
-<span class="c1">#Fraction Conserv - federalism</span>
-<span class="c1">#by MQ Score</span>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>The MS Score dataset uses the same Justice name format as the Supreme Court Case dataset and calculates an MS Score for each Justice in each term. For the purposes of this tutorial, we are only interested in the Estimated Martin-Quinn score (post_mn). To learn more about the other column variables, see <a href="https://mqscores.lsa.umich.edu/measures.php">here</a>.</p>
+<p>At this point, we have the data that we need, and we've already done the minimal data tidying necessary. Now we can step into investigating and analyzing the data.</p>
+<hr>
+<h2 id="Exploratory-Data-Analysis"><center>Exploratory Data Analysis</center><a class="anchor-link" href="#Exploratory-Data-Analysis">&#182;</a></h2><p>For this section, we perform some calculations in order to get a high-level view of Justice voting patterns. We use seaborn to create some nice looking graphs to more easily visualize the information.</p>
+<h3 id="Calculating-the-Voting-Record-of-Each-Justice">Calculating the Voting Record of Each Justice<a class="anchor-link" href="#Calculating-the-Voting-Record-of-Each-Justice">&#182;</a></h3><p>First, we calculate the frequency each Justice voted conservatively for the cases they participated in. This is easily done by summing the occasions where the Justice voted conservatively and liberally and doing some basic division.</p>
+<p>% of conservative votes $ = \frac{\sum(Conservative Votes)}{\sum(Conservative Votes) + \sum(Liberal Votes)}$</p>
+<p>In addition, the calculating this percentage for all cases the Justice participated in, we can also calculate this percentage of conservative votes for a specific subset of cases based on the main legal issue. Below, we calculate the percentage of conservative votes for Civil Rights Cases and Federalism Cases. For this tutorial, we choose Civil Rights and Federalism as important areas of law that assumably presents a clear divide for liberal/conservative ideologies, but we can also choose other types of cases like criminal procedure or privacy. See <a href="http://scdb.wustl.edu/documentation.php?var=issueArea">here</a>.</p>
 
-<span class="c1">#df[&#39;justiceName&#39;].value_counts()</span>
-</pre></div>
-
-    </div>
 </div>
 </div>
-
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[5]:</div>
+<div class="prompt input_prompt">In&nbsp;[29]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">justiceList</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">justiceName</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#get a list of all the Justices and initialize some empty arrays to store calculations</span>
+<span class="n">justiceList</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">justiceName</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
 <span class="n">votingRecord</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">votingRecordCL</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="n">votingRecordFed</span> <span class="o">=</span> <span class="p">[]</span>
 
+<span class="c1">#iterate through the list of justices</span>
 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">justiceList</span><span class="p">:</span>
+    
+    <span class="c1">#Sum the number of times each individual justice voted conservatively/liberally</span>
     <span class="n">cons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">justiceName</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)])</span>
     <span class="n">lib</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">justiceName</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)])</span>
+    <span class="c1">#calculate the % of conservative votes</span>
     <span class="n">perc</span> <span class="o">=</span> <span class="n">cons</span><span class="o">/</span><span class="p">(</span><span class="n">cons</span><span class="o">+</span><span class="n">lib</span><span class="p">)</span>
+    <span class="c1">#append calculation to the list</span>
     <span class="n">votingRecord</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perc</span><span class="p">)</span>
     
-    <span class="c1">#Civil Rights coded as the number 2</span>
+    <span class="c1">#Same as above, but targeting only Civil Rights cases (where issueArea coded as the number 2)</span>
     <span class="n">cons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">justiceName</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">issueArea</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)])</span>
     <span class="n">lib</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">justiceName</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">issueArea</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)])</span>
     <span class="n">perc</span> <span class="o">=</span> <span class="n">cons</span><span class="o">/</span><span class="p">(</span><span class="n">cons</span><span class="o">+</span><span class="n">lib</span><span class="p">)</span>
     <span class="n">votingRecordCL</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perc</span><span class="p">)</span>
     
-    <span class="c1">#Federalism coded as the number 10</span>
+    <span class="c1">#Same as above, but targeting only Federalism cases (where issueArea coded as the number 10)</span>
     <span class="n">cons</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">justiceName</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">issueArea</span> <span class="o">==</span> <span class="mi">10</span><span class="p">)])</span>
     <span class="n">lib</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">justiceName</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">issueArea</span> <span class="o">==</span> <span class="mi">10</span><span class="p">)])</span>
     <span class="n">perc</span> <span class="o">=</span> <span class="n">cons</span><span class="o">/</span><span class="p">(</span><span class="n">cons</span><span class="o">+</span><span class="n">lib</span><span class="p">)</span>
     <span class="n">votingRecordFed</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">perc</span><span class="p">)</span>
-    
+
+<span class="c1">#setting up data to create a new DataFrame</span>
 <span class="n">votingPercData</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;justiceName&#39;</span><span class="p">:</span> <span class="n">justiceList</span><span class="p">,</span>
                   <span class="s1">&#39;percAllCases&#39;</span><span class="p">:</span> <span class="n">votingRecord</span><span class="p">,</span>
                   <span class="s1">&#39;percCivilRights&#39;</span><span class="p">:</span> <span class="n">votingRecordCL</span><span class="p">,</span>
@@ -13902,6 +13955,7 @@ div#notebook {
     
 <span class="n">votingPerc</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">votingPercData</span><span class="p">)</span>
 
+<span class="c1">#sorting justices by their proportion of conservative votes</span>
 <span class="n">votingPerc</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;percAllCases&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 
@@ -13915,7 +13969,7 @@ div#notebook {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[5]:</div>
+    <div class="prompt output_prompt">Out[29]:</div>
 
 
 
@@ -14222,18 +14276,30 @@ div#notebook {
 </div>
 
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div><div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>We can see from the table output above that some of our more recent justices top the charts in terms of their proportion of conservative votes. Justices Thomas, Scalia, Gorsuch, Kavanaugh, Kennedy, and Roberts are in the top 15 of justices since 1946. Justices Kagan, Ginsburg, and Sotomayor are in the bottom 15 of justices in terms of their proportion of conservative votes.</p>
+<p>Breaking the results down into different types of cases, we can also see that the Justices are generally consistent in their proportion of conservative votes for Civil Rights cases and Federalism cases. Note that Justices Gorsuch and Kavanaugh have a 100% conservative voting record for Federalism cases partially because of a small sample size (they are our two newest associate Justices).</p>
+<hr>
+<h3 id="Calculating-the-MQ-Score-for-Each-Justice">Calculating the MQ Score for Each Justice<a class="anchor-link" href="#Calculating-the-MQ-Score-for-Each-Justice">&#182;</a></h3><p>Next, we calculate the average Martin-Quinn Scores for each Justice so that we may see if these scores generally align with the proportion of conservative votes. This is easily done with DataFrames.</p>
+
+</div>
+</div>
+</div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">avgMQ</span> <span class="o">=</span> <span class="n">MQScores</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;justiceName&#39;</span><span class="p">)[</span><span class="s1">&#39;post_mn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="c1">#Grouping the data by Justice and averaging each Justice&#39;s MQ Score across the terms they were active</span>
+<span class="n">avgMQ</span> <span class="o">=</span> <span class="n">MQScores</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;justiceName&#39;</span><span class="p">)[</span><span class="s1">&#39;post_mn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
+<span class="c1">#merging the MS Scores with the previous dataset</span>
 <span class="n">comb</span> <span class="o">=</span> <span class="n">votingPerc</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">avgMQ</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s1">&#39;justiceName&#39;</span><span class="p">,</span> <span class="n">right_on</span><span class="o">=</span><span class="s1">&#39;justiceName&#39;</span><span class="p">)</span>
 
-<span class="n">comb</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;percAllCases&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-<span class="c1">#display(avgMQ)</span>
+<span class="c1">#sorting the table by the MQ Score</span>
+<span class="n">comb</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;post_mn&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 
     </div>
@@ -14246,7 +14312,7 @@ div#notebook {
 
 <div class="output_area">
 
-    <div class="prompt output_prompt">Out[6]:</div>
+    <div class="prompt output_prompt">Out[33]:</div>
 
 
 
@@ -14278,20 +14344,20 @@ div#notebook {
   </thead>
   <tbody>
     <tr>
-      <th>23</th>
-      <td>WHRehnquist</td>
-      <td>0.705085</td>
-      <td>0.765854</td>
-      <td>0.627604</td>
-      <td>2.969176</td>
-    </tr>
-    <tr>
       <th>29</th>
       <td>CThomas</td>
       <td>0.697771</td>
       <td>0.782214</td>
       <td>0.641860</td>
       <td>3.603655</td>
+    </tr>
+    <tr>
+      <th>23</th>
+      <td>WHRehnquist</td>
+      <td>0.705085</td>
+      <td>0.765854</td>
+      <td>0.627604</td>
+      <td>2.969176</td>
     </tr>
     <tr>
       <th>26</th>
@@ -14302,12 +14368,12 @@ div#notebook {
       <td>2.514533</td>
     </tr>
     <tr>
-      <th>36</th>
-      <td>NMGorsuch</td>
-      <td>0.660920</td>
-      <td>0.541667</td>
-      <td>1.000000</td>
-      <td>0.982250</td>
+      <th>20</th>
+      <td>WEBurger</td>
+      <td>0.652660</td>
+      <td>0.632822</td>
+      <td>0.392045</td>
+      <td>1.890000</td>
     </tr>
     <tr>
       <th>33</th>
@@ -14318,28 +14384,36 @@ div#notebook {
       <td>1.816733</td>
     </tr>
     <tr>
-      <th>20</th>
-      <td>WEBurger</td>
-      <td>0.652660</td>
-      <td>0.632822</td>
-      <td>0.392045</td>
-      <td>1.890000</td>
+      <th>12</th>
+      <td>JHarlan2</td>
+      <td>0.574025</td>
+      <td>0.564972</td>
+      <td>0.480519</td>
+      <td>1.620529</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>RHJackson</td>
-      <td>0.625634</td>
-      <td>0.529915</td>
-      <td>0.500000</td>
-      <td>0.698538</td>
+      <th>14</th>
+      <td>CEWhittaker</td>
+      <td>0.555443</td>
+      <td>0.402062</td>
+      <td>0.377358</td>
+      <td>1.166333</td>
     </tr>
     <tr>
-      <th>37</th>
-      <td>BMKavanaugh</td>
-      <td>0.614286</td>
-      <td>0.750000</td>
-      <td>1.000000</td>
-      <td>0.540500</td>
+      <th>10</th>
+      <td>SMinton</td>
+      <td>0.573296</td>
+      <td>0.622951</td>
+      <td>0.461538</td>
+      <td>1.101875</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>FMVinson</td>
+      <td>0.557164</td>
+      <td>0.581197</td>
+      <td>0.508197</td>
+      <td>1.034571</td>
     </tr>
     <tr>
       <th>25</th>
@@ -14348,6 +14422,22 @@ div#notebook {
       <td>0.635007</td>
       <td>0.574394</td>
       <td>1.014720</td>
+    </tr>
+    <tr>
+      <th>0</th>
+      <td>HHBurton</td>
+      <td>0.564909</td>
+      <td>0.560000</td>
+      <td>0.500000</td>
+      <td>1.005857</td>
+    </tr>
+    <tr>
+      <th>36</th>
+      <td>NMGorsuch</td>
+      <td>0.660920</td>
+      <td>0.541667</td>
+      <td>1.000000</td>
+      <td>0.982250</td>
     </tr>
     <tr>
       <th>22</th>
@@ -14366,6 +14456,14 @@ div#notebook {
       <td>0.930267</td>
     </tr>
     <tr>
+      <th>1</th>
+      <td>RHJackson</td>
+      <td>0.625634</td>
+      <td>0.529915</td>
+      <td>0.500000</td>
+      <td>0.698538</td>
+    </tr>
+    <tr>
       <th>27</th>
       <td>AMKennedy</td>
       <td>0.586480</td>
@@ -14374,52 +14472,12 @@ div#notebook {
       <td>0.682323</td>
     </tr>
     <tr>
-      <th>12</th>
-      <td>JHarlan2</td>
-      <td>0.574025</td>
-      <td>0.564972</td>
-      <td>0.480519</td>
-      <td>1.620529</td>
-    </tr>
-    <tr>
-      <th>10</th>
-      <td>SMinton</td>
-      <td>0.573296</td>
-      <td>0.622951</td>
-      <td>0.461538</td>
-      <td>1.101875</td>
-    </tr>
-    <tr>
-      <th>4</th>
-      <td>SFReed</td>
-      <td>0.569957</td>
-      <td>0.633136</td>
-      <td>0.523256</td>
-      <td>0.374150</td>
-    </tr>
-    <tr>
-      <th>0</th>
-      <td>HHBurton</td>
-      <td>0.564909</td>
-      <td>0.560000</td>
-      <td>0.500000</td>
-      <td>1.005857</td>
-    </tr>
-    <tr>
-      <th>8</th>
-      <td>FMVinson</td>
-      <td>0.557164</td>
-      <td>0.581197</td>
-      <td>0.508197</td>
-      <td>1.034571</td>
-    </tr>
-    <tr>
-      <th>14</th>
-      <td>CEWhittaker</td>
-      <td>0.555443</td>
-      <td>0.402062</td>
-      <td>0.377358</td>
-      <td>1.166333</td>
+      <th>37</th>
+      <td>BMKavanaugh</td>
+      <td>0.614286</td>
+      <td>0.750000</td>
+      <td>1.000000</td>
+      <td>0.540500</td>
     </tr>
     <tr>
       <th>3</th>
@@ -14428,6 +14486,14 @@ div#notebook {
       <td>0.346570</td>
       <td>0.436090</td>
       <td>0.520750</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>TCClark</td>
+      <td>0.478792</td>
+      <td>0.442438</td>
+      <td>0.445122</td>
+      <td>0.464667</td>
     </tr>
     <tr>
       <th>16</th>
@@ -14446,12 +14512,12 @@ div#notebook {
       <td>0.402217</td>
     </tr>
     <tr>
-      <th>9</th>
-      <td>TCClark</td>
-      <td>0.478792</td>
-      <td>0.442438</td>
-      <td>0.445122</td>
-      <td>0.464667</td>
+      <th>4</th>
+      <td>SFReed</td>
+      <td>0.569957</td>
+      <td>0.633136</td>
+      <td>0.523256</td>
+      <td>0.374150</td>
     </tr>
     <tr>
       <th>21</th>
@@ -14470,76 +14536,20 @@ div#notebook {
       <td>-0.772474</td>
     </tr>
     <tr>
+      <th>17</th>
+      <td>AJGoldberg</td>
+      <td>0.241124</td>
+      <td>0.049296</td>
+      <td>0.583333</td>
+      <td>-1.076333</td>
+    </tr>
+    <tr>
       <th>31</th>
       <td>SGBreyer</td>
       <td>0.408955</td>
       <td>0.339785</td>
       <td>0.309392</td>
       <td>-1.233231</td>
-    </tr>
-    <tr>
-      <th>24</th>
-      <td>JPStevens</td>
-      <td>0.389995</td>
-      <td>0.389483</td>
-      <td>0.378667</td>
-      <td>-1.809771</td>
-    </tr>
-    <tr>
-      <th>35</th>
-      <td>EKagan</td>
-      <td>0.386423</td>
-      <td>0.290909</td>
-      <td>0.390244</td>
-      <td>-1.582400</td>
-    </tr>
-    <tr>
-      <th>30</th>
-      <td>RBGinsburg</td>
-      <td>0.374253</td>
-      <td>0.355731</td>
-      <td>0.343915</td>
-      <td>-1.730963</td>
-    </tr>
-    <tr>
-      <th>34</th>
-      <td>SSotomayor</td>
-      <td>0.358779</td>
-      <td>0.294118</td>
-      <td>0.352941</td>
-      <td>-2.679364</td>
-    </tr>
-    <tr>
-      <th>18</th>
-      <td>AFortas</td>
-      <td>0.305854</td>
-      <td>0.124031</td>
-      <td>0.416667</td>
-      <td>-1.325000</td>
-    </tr>
-    <tr>
-      <th>13</th>
-      <td>WJBrennan</td>
-      <td>0.294417</td>
-      <td>0.162221</td>
-      <td>0.376344</td>
-      <td>-1.780206</td>
-    </tr>
-    <tr>
-      <th>19</th>
-      <td>TMarshall</td>
-      <td>0.281065</td>
-      <td>0.154796</td>
-      <td>0.340336</td>
-      <td>-2.831292</td>
-    </tr>
-    <tr>
-      <th>5</th>
-      <td>HLBlack</td>
-      <td>0.279464</td>
-      <td>0.251471</td>
-      <td>0.390351</td>
-      <td>-1.764471</td>
     </tr>
     <tr>
       <th>11</th>
@@ -14550,12 +14560,12 @@ div#notebook {
       <td>-1.257313</td>
     </tr>
     <tr>
-      <th>17</th>
-      <td>AJGoldberg</td>
-      <td>0.241124</td>
-      <td>0.049296</td>
-      <td>0.583333</td>
-      <td>-1.076333</td>
+      <th>18</th>
+      <td>AFortas</td>
+      <td>0.305854</td>
+      <td>0.124031</td>
+      <td>0.416667</td>
+      <td>-1.325000</td>
     </tr>
     <tr>
       <th>6</th>
@@ -14566,12 +14576,68 @@ div#notebook {
       <td>-1.409286</td>
     </tr>
     <tr>
+      <th>35</th>
+      <td>EKagan</td>
+      <td>0.386423</td>
+      <td>0.290909</td>
+      <td>0.390244</td>
+      <td>-1.582400</td>
+    </tr>
+    <tr>
       <th>7</th>
       <td>FMurphy</td>
       <td>0.231105</td>
       <td>0.140000</td>
       <td>0.548387</td>
       <td>-1.589200</td>
+    </tr>
+    <tr>
+      <th>30</th>
+      <td>RBGinsburg</td>
+      <td>0.374253</td>
+      <td>0.355731</td>
+      <td>0.343915</td>
+      <td>-1.730963</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>HLBlack</td>
+      <td>0.279464</td>
+      <td>0.251471</td>
+      <td>0.390351</td>
+      <td>-1.764471</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>WJBrennan</td>
+      <td>0.294417</td>
+      <td>0.162221</td>
+      <td>0.376344</td>
+      <td>-1.780206</td>
+    </tr>
+    <tr>
+      <th>24</th>
+      <td>JPStevens</td>
+      <td>0.389995</td>
+      <td>0.389483</td>
+      <td>0.378667</td>
+      <td>-1.809771</td>
+    </tr>
+    <tr>
+      <th>34</th>
+      <td>SSotomayor</td>
+      <td>0.358779</td>
+      <td>0.294118</td>
+      <td>0.352941</td>
+      <td>-2.679364</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>TMarshall</td>
+      <td>0.281065</td>
+      <td>0.154796</td>
+      <td>0.340336</td>
+      <td>-2.831292</td>
     </tr>
     <tr>
       <th>2</th>
@@ -14588,6 +14654,19 @@ div#notebook {
 
 </div>
 
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+
+    </div>
 </div>
 </div>
 
